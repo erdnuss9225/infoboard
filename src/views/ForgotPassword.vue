@@ -1,0 +1,84 @@
+<template>
+  <div class="reset-password">
+    <Modal v-if="modalActive" v-on:close-modal="closeModal" :modalMessage="modalMessage"/>
+    <Loading v-if="loading" />
+    <div class="form-wrap">
+      <form class="reset">
+        <p class="login-register">
+          Du hast bereits einen Account?
+          <router-link class="router-link" :to="{ name: 'Login' }">Login</router-link>
+        </p>
+        <h2>Passwort zurücksetzen</h2>
+        <p>Zum Zurücksetzen Email Adresse des Accounts eingeben.</p>
+        <div class="inputs">
+          <div class="input">
+            <input type="text" placeholder="Email" v-model="email">
+            <email class="icon" />
+          </div>
+        </div>
+        <button @click.prevent="resetPassword">Zurücksetzen</button>
+        <div class="angle"></div>
+      </form>
+      <div class="background"></div>
+    </div>
+  </div>
+</template>
+
+<script>
+import email from "../assets/Icons/envelope-regular.svg";
+import Modal from "../components/Modal.vue";
+import Loading from "../components/Loading.vue";
+import firebase from "firebase/app";
+import "firebase/auth"
+
+export default {
+  name: "ForgotPassword",
+  components: { email, Modal, Loading },
+  data() {
+    return {
+      email: null,
+      modalActive: false,
+      modalMessage: "",
+      loading: null,
+    }
+  },
+  methods: {
+    closeModal() {
+      this.modalActive = !this.modalActive;
+      this.email = "";
+    },
+    resetPassword() {
+      this.loading = true;
+      firebase.auth()
+      .sendPasswordResetEmail(this.email)
+      .then(() => {
+        this.modalMessage = "Wenn für die Email Adresse ein Account existiert, erhältst Du eine Mail von uns mit einem Link zum Zurücksetzen Deines Passworts";
+        this.loading = false;
+        this.modalActive = true;
+      })
+      .catch(err => {
+        this.modalMessage = err.message;
+        this.loading = false;
+        this.modalActive = true;
+      })
+    }
+  }
+}
+</script>
+
+<style lang="scss" scoped>
+.reset-password {
+  position: relative;
+  .form-wrap {
+    .reset {
+      h2 {
+        margin-bottom: 8px;
+      }
+      p {
+        text-align: center;
+        margin-bottom: 32px;
+      }
+    }
+  }
+}
+</style>
